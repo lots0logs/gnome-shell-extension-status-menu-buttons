@@ -1,6 +1,6 @@
-# gnome-shell-extension-status-menu-buttons
+# Status Menu Buttons
 
-Adds a hibernate, suspend, & lock button to the GNOME status menu.
+A **GNOME Shell Extension** that adds a hibernate, suspend, & lock button to the GNOME status menu.
 
 ### Dependancies
 * LightDM
