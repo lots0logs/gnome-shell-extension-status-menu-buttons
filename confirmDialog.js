@@ -51,6 +51,19 @@ const HibernateDialogContent = {
     iconStyleClass: 'end-session-dialog-shutdown-icon',
 };
 
+const SuspendDialogContent = {
+    subject: C_("title", "Suspend"),
+    description: "Do you really want to suspend the system ?",
+    confirmButtons: [{ signal: 'CancelSuspend',
+                       label:  C_("button", "Cancel"),
+                         key:    Clutter.Escape },
+                     { signal: 'ConfirmedSuspend',
+                       label:  C_("button", "Hibernate"),
+                       default: true}],
+    iconName: 'document-save-symbolic',
+    iconStyleClass: 'end-session-dialog-shutdown-icon',
+};
+
 const SystemdMissingDialogContent = {
     subject: C_("title", "Hybernate button: Systemd Missing"),
     description: "Systemd seems to be missing and is required.",

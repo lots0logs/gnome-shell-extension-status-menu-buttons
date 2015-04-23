@@ -266,9 +266,7 @@ const Extension = new Lang.Class({
 
 	_onSuspendClicked: function () {
 		this.systemMenu.menu.itemActivated();
-		this._dialog = new ConfirmDialog.ConfirmDialog(ConfirmDialog.SuspendDialogContent);
-		this._dialog.connect('ConfirmedSuspend', Lang.bind(this, this._loginManagerSuspend));
-		this._dialog.open();
+		this._loginManagerSuspend();
 	},
 
 	_onHybridSleepClicked: function () {
@@ -278,6 +276,7 @@ const Extension = new Lang.Class({
 
 	_onLockClicked: function () {
 		this.systemMenu.menu.itemActivated();
+		this._loginManagerLock();
 	},
 
 	_checkRequirements: function () {
@@ -307,7 +306,7 @@ const Extension = new Lang.Class({
 		this._suspendActionId = this._suspendAction.connect('clicked', Lang.bind(this, this._onSuspendClicked));
 
 		this._lockAction = this.systemMenu._createActionButton('document-save-symbolic', _("Lock"));
-		this._lockActionId = this._lockAction.connect('clicked', Lang.bind(this, this._onSuspendClicked));
+		this._lockActionId = this._lockAction.connect('clicked', Lang.bind(this, this._onLockClicked));
 
 		this._altHibernateSwitcher = new StatusSystem.AltSwitcher(this._hibernateAction, this._hybridSleepAction);
 		this.systemMenu._actionsItem.actor.insert_child_at_index(this._altHibernateSwitcher.actor, 4);
