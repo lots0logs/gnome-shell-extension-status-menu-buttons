@@ -71,57 +71,66 @@ const SystemdProxyIface = '<node> \
 const SystemdLoginManagerProxy = Gio.DBusProxy.makeProxyWrapper(SystemdProxyIface);
 
 const SystemdProxy = new Lang.Class({
-    Name: 'SystemdProxy',
+	Name: 'SystemdProxy',
 
-    _init: function() {
-        this._proxy = new SystemdLoginManagerProxy(Gio.DBus.system,
-                                              'org.freedesktop.login1',
-                                              '/org/freedesktop/login1');
-        this._proxy.connectSignal('PrepareForSleep',
-                                  Lang.bind(this, this._prepareForSleep));
-    },
+	_init: function () {
+		this._proxy = new SystemdLoginManagerProxy(Gio.DBus.system,
+			'org.freedesktop.login1',
+			'/org/freedesktop/login1');
+		this._proxy.connectSignal('PrepareForSleep',
+			Lang.bind(this, this._prepareForSleep));
+	},
 
-	canSuspend: function(asyncCallback) {
-        this._proxy.CanSuspendRemote(function(result, error) {
-            if (error)
-                asyncCallback(false);
-            else
-                asyncCallback(result[0] != 'no');
-        });
-    },
-	suspend: function() {
-        this._proxy.SuspendRemote(true);
-    },
+	canSuspend: function (asyncCallback) {
+		this._proxy.CanSuspendRemote(function (result, error) {
+			if (error) {
+				global.log(error);
+				asyncCallback(false);
+			} else {
+				global.log(result);
+				asyncCallback(result[0] != 'no');
+			}
+		});
+	},
+	suspend: function () {
+		this._proxy.SuspendRemote(true);
+	},
 
-	canHibernate: function(asyncCallback) {
-        this._proxy.CanHibernateRemote(function(result, error) {
-            if (error)
-                asyncCallback(false);
-            else
-                asyncCallback(result[0] != 'no');
-        });
-    },
-	hibernate: function() {
-        this._proxy.HibernateRemote(true);
-    },
-	canHybridSleep: function(asyncCallback) {
-        this._proxy.CanHybridSleepRemote(function(result, error) {
-            if (error)
-                asyncCallback(false);
-            else
-                asyncCallback(result[0] != 'no');
-        });
-    },
-	hybridSleep: function() {
-        this._proxy.HybridSleepRemote(true);
-    },
-	lockSession: function() {
-        this._proxy.LockSessionRemote(true);
-    },
+	canHibernate: function (asyncCallback) {
+		this._proxy.CanHibernateRemote(function (result, error) {
+			if (error) {
+				global.log(error);
+				asyncCallback(false);
+			} else {
+				global.log(result);
+				asyncCallback(result[0] != 'no');
+			}
+		});
+	},
+	hibernate: function () {
+		this._proxy.HibernateRemote(true);
+	},
+	canHybridSleep: function (asyncCallback) {
+		this._proxy.CanHybridSleepRemote(function (result, error) {
+			if (error) {
+				global.log(error);
+				asyncCallback(false);
+			} else {
+				global.log(result);
+				asyncCallback(result[0] != 'no');
+			}
+		});
+	},
+	hybridSleep: function () {
+		this._proxy.HybridSleepRemote(true);
+	},
+	lockSession: function () {
+		this._proxy.LockSessionRemote(true);
+	},
 
-	_prepareForSleep: function(proxy, sender, [aboutToSuspend]) {
-        this.emit('prepare-for-sleep', aboutToSuspend);
-    }
+	_prepareForSleep: function (proxy, sender, [aboutToSuspend]) {
+		this.emit('prepare-for-sleep', aboutToSuspend);
+	}
 });
 Signals.addSignalMethods(SystemdProxy.prototype);
 
@@ -134,6 +143,7 @@ const Extension = new Lang.Class({
 	_loginManagerCanHibernate: function (asyncCallback) {
 		if (this._loginManager._proxy) {
 			// systemd path
+			global.log('_loginManager._proxy exists')
 			this._loginManager._proxy.call("canHibernate",
 				null,
 				Gio.DBusCallFlags.NONE,
@@ -144,6 +154,7 @@ const Extension = new Lang.Class({
 						result = proxy.call_finish(asyncResult).deep_unpack();
 					} catch (e) {
 						error = e;
+						global.log(error)
 					}
 
 					if (error)
@@ -153,6 +164,7 @@ const Extension = new Lang.Class({
 				});
 		} else {
 			Mainloop.idle_add(Lang.bind(this, function () {
+				global.log('_loginManager._proxy not found');
 				asyncCallback(false);
 				return false;
 			}));
@@ -174,32 +186,32 @@ const Extension = new Lang.Class({
 	},
 
 	/*_loginManagerCanLock: function (asyncCallback) {
-		if (this._loginManager._proxy) {
-			// systemd path
-			this._loginManager._proxy.call("canLock",
-				null,
-				Gio.DBusCallFlags.NONE,
-				-1, null, function (proxy, asyncResult) {
-					let result, error;
+	 if (this._loginManager._proxy) {
+	 // systemd path
+	 this._loginManager._proxy.call("canLock",
+	 null,
+	 Gio.DBusCallFlags.NONE,
+	 -1, null, function (proxy, asyncResult) {
+	 let result, error;
 
-					try {
-						result = proxy.call_finish(asyncResult).deep_unpack();
-					} catch (e) {
-						error = e;
-					}
+	 try {
+	 result = proxy.call_finish(asyncResult).deep_unpack();
+	 } catch (e) {
+	 error = e;
+	 }
 
-					if (error)
-						asyncCallback(false);
-					else
-						asyncCallback(result[0] != 'no');
-				});
-		} else {
-			Mainloop.idle_add(Lang.bind(this, function () {
-				asyncCallback(false);
-				return false;
-			}));
-		}
-	},*/
+	 if (error)
+	 asyncCallback(false);
+	 else
+	 asyncCallback(result[0] != 'no');
+	 });
+	 } else {
+	 Mainloop.idle_add(Lang.bind(this, function () {
+	 asyncCallback(false);
+	 return false;
+	 }));
+	 }
+	 },*/
 
 	_loginManagerLock: function () {
 		if (this._loginManager._proxy) {
@@ -333,8 +345,8 @@ const Extension = new Lang.Class({
 	},
 
 	_updateHaveLock: function () {
-			this._haveLock = true;
-			this._updateLock();
+		this._haveLock = true;
+		this._updateLock();
 	},
 
 	_updateLock: function () {
