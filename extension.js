@@ -68,7 +68,30 @@ const SystemdProxyIface = '<node> \
 </interface> \
 </node>';
 
+const LightLockerProxyIface = '<node> \
+<interface name="org.gnome.ScreenSaver"> \
+<method name="Lock"> \
+    <arg type="b" direction="in"/> \
+</method> \
+</interface> \
+</node>';
+
 const SystemdLoginManagerProxy = Gio.DBusProxy.makeProxyWrapper(SystemdProxyIface);
+const LightLockerDbusProxy = Gio.DBusProxy.makeProxyWrapper(LightLockerProxyIface);
+
+const LightLockerProxy = new Lang.Class({
+	Name: 'LightLockerProxy',
+
+	_init: function () {
+		this._proxy = new LightLockerDbusProxy(Gio.DBus.system,
+			'org.gnome.ScreenSaver',
+			'/org/gnome/ScreenSaver');
+	},
+
+	lock: function () {
+		this._proxy.LockRemote(true);
+	}
+});
 
 const SystemdProxy = new Lang.Class({
 	Name: 'SystemdProxy',
@@ -81,7 +104,7 @@ const SystemdProxy = new Lang.Class({
 			Lang.bind(this, this._prepareForSleep));
 	},
 
-	canSuspend: function (asyncCallback) {
+	/*canSuspend: function (asyncCallback) {
 		this._proxy.CanSuspendRemote(function (result, error) {
 			if (error) {
 				global.log(error);
@@ -94,7 +117,7 @@ const SystemdProxy = new Lang.Class({
 	},
 	suspend: function () {
 		this._proxy.SuspendRemote(true);
-	},
+	},*/
 
 	canHibernate: function (asyncCallback) {
 		this._proxy.CanHibernateRemote(function (result, error) {
@@ -143,8 +166,7 @@ const Extension = new Lang.Class({
 	_loginManagerCanHibernate: function (asyncCallback) {
 		if (this._loginManager._proxy) {
 			// systemd path
-			global.log('_loginManager._proxy exists')
-			this._loginManager._proxy.call("canHibernate",
+			this._loginManager._proxy.call("CanHibernate",
 				null,
 				Gio.DBusCallFlags.NONE,
 				-1, null, function (proxy, asyncResult) {
@@ -174,49 +196,7 @@ const Extension = new Lang.Class({
 	_loginManagerHibernate: function () {
 		if (this._loginManager._proxy) {
 			// systemd path
-			this._loginManager._proxy.call("hibernate",
-				GLib.Variant.new('(b)', [true]),
-				Gio.DBusCallFlags.NONE,
-				-1, null, null);
-		} else {
-			// Can't do in ConsoleKit
-			this._loginManager.emit('prepare-for-sleep', true);
-			this._loginManager.emit('prepare-for-sleep', false);
-		}
-	},
-
-	/*_loginManagerCanLock: function (asyncCallback) {
-	 if (this._loginManager._proxy) {
-	 // systemd path
-	 this._loginManager._proxy.call("canLock",
-	 null,
-	 Gio.DBusCallFlags.NONE,
-	 -1, null, function (proxy, asyncResult) {
-	 let result, error;
-
-	 try {
-	 result = proxy.call_finish(asyncResult).deep_unpack();
-	 } catch (e) {
-	 error = e;
-	 }
-
-	 if (error)
-	 asyncCallback(false);
-	 else
-	 asyncCallback(result[0] != 'no');
-	 });
-	 } else {
-	 Mainloop.idle_add(Lang.bind(this, function () {
-	 asyncCallback(false);
-	 return false;
-	 }));
-	 }
-	 },*/
-
-	_loginManagerLock: function () {
-		if (this._loginManager._proxy) {
-			// systemd path
-			this._loginManager._proxy.call("lockSession",
+			this._loginManager._proxy.call("Hibernate",
 				GLib.Variant.new('(b)', [true]),
 				Gio.DBusCallFlags.NONE,
 				-1, null, null);
@@ -230,7 +210,7 @@ const Extension = new Lang.Class({
 	_loginManagerCanHybridSleep: function (asyncCallback) {
 		if (this._loginManager._proxy) {
 			// systemd path
-			this._loginManager._proxy.call("canHybridSleep",
+			this._loginManager._proxy.call("CanHybridSleep",
 				null,
 				Gio.DBusCallFlags.NONE,
 				-1, null, function (proxy, asyncResult) {
@@ -258,7 +238,7 @@ const Extension = new Lang.Class({
 	_loginManagerHybridSleep: function () {
 		if (this._loginManager._proxy) {
 			// systemd path
-			this._loginManager._proxy.call("hybridSleep",
+			this._loginManager._proxy.call("HybridSleep",
 				GLib.Variant.new('(b)', [true]),
 				Gio.DBusCallFlags.NONE,
 				-1, null, null);
@@ -272,7 +252,7 @@ const Extension = new Lang.Class({
 	_loginManagerCanSuspend: function (asyncCallback) {
 		if (this._loginManager._proxy) {
 			// systemd path
-			this._loginManager._proxy.call("canSuspend",
+			this._loginManager._proxy.call("CanSuspend",
 				null,
 				Gio.DBusCallFlags.NONE,
 				-1, null, function (proxy, asyncResult) {
@@ -300,7 +280,7 @@ const Extension = new Lang.Class({
 	_loginManagerSuspend: function () {
 		if (this._loginManager._proxy) {
 			// systemd path
-			this._loginManager._proxy.call("suspend",
+			this._loginManager._proxy.call("Suspend",
 				GLib.Variant.new('(b)', [true]),
 				Gio.DBusCallFlags.NONE,
 				-1, null, null);
@@ -308,6 +288,24 @@ const Extension = new Lang.Class({
 			// Can't do in ConsoleKit
 			this._loginManager.emit('prepare-for-sleep', true);
 			this._loginManager.emit('prepare-for-sleep', false);
+		}
+	},
+
+	_lightLockerLock: function () {
+		if (this._lightLocker._proxy) {
+			this._lightLocker._proxy.call("Lock",
+				GLib.Variant.new('(b)', [true]),
+				Gio.DBusCallFlags.NONE,
+				-1, null, null);
+		} else {
+			global.log('Unable to communicate with Light Locker. Is it running?')
+			this._dialog = new ConfirmDialog.ConfirmDialog(ConfirmDialog.LightLockerMissingDialogContent);
+			this._dialog.connect('DisableExtension', function () {
+				let enabledExtensions = global.settings.get_strv(ExtensionSystem.ENABLED_EXTENSIONS_KEY);
+				enabledExtensions.splice(enabledExtensions.indexOf(Me.uuid), 1);
+				global.settings.set_strv(ExtensionSystem.ENABLED_EXTENSIONS_KEY, enabledExtensions);
+			});
+			this._dialog.open();
 		}
 	},
 
@@ -333,7 +331,7 @@ const Extension = new Lang.Class({
 		this._hybridSleepAction.visible = this._haveHybridSleep && !Main.sessionMode.isLocked;
 	},
 
-	_updateHaveSuspend: function () {
+	/*_updateHaveSuspend: function () {
 		this._loginManagerCanSuspend(Lang.bind(this, function (result) {
 			this._haveSuspend = result;
 			this._updateSuspend();
@@ -342,7 +340,7 @@ const Extension = new Lang.Class({
 
 	_updateSuspend: function () {
 		this._suspendAction.visible = this._haveSuspend && !Main.sessionMode.isLocked;
-	},
+	},*/
 
 	_updateHaveLock: function () {
 		this._haveLock = true;
@@ -372,10 +370,10 @@ const Extension = new Lang.Class({
 
 	_onLockClicked: function () {
 		this.systemMenu.menu.itemActivated();
-		this._loginManagerLock();
+		this._lightLockerLock();
 	},
 
-	_checkRequirements: function () {
+/*	_checkRequirements: function () {
 		if (!LoginManager.haveSystemd()) {
 			this._dialog = new ConfirmDialog.ConfirmDialog(ConfirmDialog.SystemdMissingDialogContent);
 			this._dialog.connect('DisableExtension', function () {
@@ -385,10 +383,10 @@ const Extension = new Lang.Class({
 			});
 			this._dialog.open();
 		}
-	},
+	},*/
 
 	enable: function () {
-		this._checkRequirements();
+		this._lightLocker = new LightLockerProxy();
 		this._loginManager = new SystemdProxy();
 		this.systemMenu = Main.panel.statusArea['aggregateMenu']._system;
 
@@ -398,11 +396,12 @@ const Extension = new Lang.Class({
 		this._hybridSleepAction = this.systemMenu._createActionButton('document-save-as-symbolic', _("HybridSleep"));
 		this._hybridSleepActionId = this._hybridSleepAction.connect('clicked', Lang.bind(this, this._onHybridSleepClicked));
 
-		this._suspendAction = this.systemMenu._createActionButton('preferences-desktop-screensaver-symbolic', _("Suspend"));
-		this._suspendActionId = this._suspendAction.connect('clicked', Lang.bind(this, this._onSuspendClicked));
+		/*this._suspendAction = this.systemMenu._createActionButton('preferences-desktop-screensaver-symbolic', _("Suspend"));
+		this._suspendActionId = this._suspendAction.connect('clicked', Lang.bind(this, this._onSuspendClicked));*/
 
 		this._lockAction = this.systemMenu._createActionButton('system-lock-screen-symbolic', _("Lock"));
 		this._lockActionId = this._lockAction.connect('clicked', Lang.bind(this, this._onLockClicked));
+		this.systemMenu._actionsItem.actor.insert_child_at_index(this._lockAction.actor, 3);
 
 		this._altHibernateSwitcher = new StatusSystem.AltSwitcher(this._hibernateAction, this._hybridSleepAction);
 		this.systemMenu._actionsItem.actor.insert_child_at_index(this._altHibernateSwitcher.actor, 4);
@@ -413,8 +412,8 @@ const Extension = new Lang.Class({
 					return;
 				this._hibernateAction.visible = true;
 				this._updateHaveHibernate();
-				this._suspendAction.visible = true;
-				this._updateHaveSuspend();
+				/*this._suspendAction.visible = true;
+				this._updateHaveSuspend();*/
 				this._lockAction.visible = true;
 				this._updateHaveLock();
 				this._updateHaveHybridSleep();
@@ -437,10 +436,10 @@ const Extension = new Lang.Class({
 			this._hibernateActionId = 0;
 		}
 
-		if (this._suspendActionId) {
+		/*if (this._suspendActionId) {
 			this._suspendAction.disconnect(this._suspendActionId);
 			this._suspendActionId = 0;
-		}
+		}*/
 
 		if (this._lockActionId) {
 			this._lockAction.disconnect(this._lockActionId);
@@ -448,6 +447,7 @@ const Extension = new Lang.Class({
 		}
 
 		this.systemMenu._actionsItem.actor.remove_child(this._altHibernateSwitcher.actor);
+		this.systemMenu._actionsItem.actor.remove_child(this._lockAction.actor);
 
 		if (this._altHibernateSwitcher) {
 			this._altHibernateSwitcher.actor.destroy();

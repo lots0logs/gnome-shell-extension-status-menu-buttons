@@ -64,16 +64,16 @@ const SuspendDialogContent = {
     iconStyleClass: 'end-session-dialog-shutdown-icon',
 };
 
-const SystemdMissingDialogContent = {
-    subject: C_("title", "Hybernate button: Systemd Missing"),
-    description: "Systemd seems to be missing and is required.",
+const LightLockerMissingDialogContent = {
+    subject: C_("title", "Status Menu Icons: Light Locker Missing"),
+    description: "Light Locker doesn't seem to be running and is required.",
     confirmButtons: [{ signal: 'CancelDisableExtension',
                        label:  C_("button", "Cancel"),
                          key:    Clutter.Escape },
                        { signal: 'DisableExtension',
                        label:  C_("button", "Disable Extension"),
                        default: true }],
-    iconName: 'document-save-symbolic',
+    iconName: 'emblem-important-symbolic',
     iconStyleClass: 'end-session-dialog-shutdown-icon',
 };
 
