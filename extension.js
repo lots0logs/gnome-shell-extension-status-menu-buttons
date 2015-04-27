@@ -92,6 +92,7 @@ const LightLockerProxy = new Lang.Class({
 		this._proxy.LockRemote(true);
 	}
 });
+Signals.addSignalMethods(LightLockerProxy.prototype);
 
 const SystemdProxy = new Lang.Class({
 	Name: 'SystemdProxy',
@@ -401,10 +402,10 @@ const Extension = new Lang.Class({
 
 		this._lockAction = this.systemMenu._createActionButton('system-lock-screen-symbolic', _("Lock"));
 		this._lockActionId = this._lockAction.connect('clicked', Lang.bind(this, this._onLockClicked));
-		this.systemMenu._actionsItem.actor.insert_child_at_index(this._lockAction.actor, 3);
+		this.systemMenu._actionsItem.actor.insert_child_at_index(this._lockAction, 2);
 
 		this._altHibernateSwitcher = new StatusSystem.AltSwitcher(this._hibernateAction, this._hybridSleepAction);
-		this.systemMenu._actionsItem.actor.insert_child_at_index(this._altHibernateSwitcher.actor, 4);
+		this.systemMenu._actionsItem.actor.insert_child_at_index(this._altHibernateSwitcher.actor, 3);
 
 		this._menuOpenStateChangedId = this.systemMenu.menu.connect('open-state-changed', Lang.bind(this,
 			function (menu, open) {
@@ -447,7 +448,7 @@ const Extension = new Lang.Class({
 		}
 
 		this.systemMenu._actionsItem.actor.remove_child(this._altHibernateSwitcher.actor);
-		this.systemMenu._actionsItem.actor.remove_child(this._lockAction.actor);
+		this.systemMenu._actionsItem.actor.remove_child(this._lockAction);
 
 		if (this._altHibernateSwitcher) {
 			this._altHibernateSwitcher.actor.destroy();
