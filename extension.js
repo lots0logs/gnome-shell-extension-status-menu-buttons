@@ -77,7 +77,7 @@ const SystemdProxyIface = '<node> \
 </node>';*/
 
 const SystemdLoginManagerProxy = Gio.DBusProxy.makeProxyWrapper(SystemdProxyIface);
-const LightLockerDbusProxy = Gio.DBusProxy.makeProxyWrapper(LightLockerProxyIface);
+//const LightLockerDbusProxy = Gio.DBusProxy.makeProxyWrapper(LightLockerProxyIface);
 
 /*const LightLockerProxy = new Lang.Class({
 	Name: 'LightLockerProxy',
@@ -313,20 +313,15 @@ const Extension = new Lang.Class({
 		this._hybridSleepAction = this.systemMenu._createActionButton('document-save-as-symbolic', _("HybridSleep"));
 		this._hybridSleepActionId = this._hybridSleepAction.connect('clicked', Lang.bind(this, this._onHybridSleepClicked));
 
-		this._settingsButton = this.systemMenu._actionsItem.actor.get_first_child();
-		this._powerButton = this.systemMenu._actionsItem.actor.get_last_child();
+		this._disabledLockButton = this.systemMenu._actionsItem.actor.get_child_at_index(1);
+		this._disabledHibernateButton = this.systemMenu._actionsItem.actor.get_child_at_index(2);
 
 		this._lockAction = this.systemMenu._createActionButton('system-lock-screen-symbolic', _("Lock"));
 		this._lockActionId = this._lockAction.connect('clicked', Lang.bind(this, this._onLockClicked));
-		this.systemMenu._actionsItem.actor.insert_child_at_index(this._lockAction, -1);
+		this.systemMenu._actionsItem.actor.replace_child(this._disabledLockButton, this._lockAction);
 
 		this._altHibernateSwitcher = new StatusSystem.AltSwitcher(this._hibernateAction, this._hybridSleepAction);
-		this.systemMenu._actionsItem.actor.insert_child_at_index(this._altHibernateSwitcher.actor, -1);
-
-		this.systemMenu._actionsItem.actor.set_child_at_index(this._settingsButton, 1);
-		this.systemMenu._actionsItem.actor.set_child_at_index(this._lockAction, 2);
-		this.systemMenu._actionsItem.actor.set_child_at_index(this._altHibernateSwitcher, 3);
-		this.systemMenu._actionsItem.actor.set_child_at_index(this._powerButton, 4);
+		this.systemMenu._actionsItem.actor.replace_child(this._disabledHibernateButton, this._altHibernateSwitcher.actor);
 
 		this._menuOpenStateChangedId = this.systemMenu.menu.connect('open-state-changed', Lang.bind(this,
 			function (menu, open) {
