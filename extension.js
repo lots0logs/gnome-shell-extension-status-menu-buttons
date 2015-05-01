@@ -278,7 +278,8 @@ const Extension = new Lang.Class({
 
 	_updateHaveLock: function () {
 		this._haveLock = true;
-		this._updateLock();
+		this._lockScreenAction.visible = true;
+		//this._updateLock();
 	},
 
 	_updateLock: function () {
@@ -307,7 +308,9 @@ const Extension = new Lang.Class({
 		this._loginManager = new SystemdProxy();
 		this.systemMenu = Main.panel.statusArea['aggregateMenu']._system;
 
-		this._hibernateAction = this.systemMenu._createActionButton('document-save-symbolic', _("Hibernate"));
+		this.systemMenu.prototype['_updateLockScreen'] = this._updateHaveLock();
+
+		/*this._hibernateAction = this.systemMenu._createActionButton('document-save-symbolic', _("Hibernate"));
 		this._hibernateActionId = this._hibernateAction.connect('clicked', Lang.bind(this, this._onHibernateClicked));
 
 		this._hybridSleepAction = this.systemMenu._createActionButton('document-save-as-symbolic', _("HybridSleep"));
@@ -332,7 +335,7 @@ const Extension = new Lang.Class({
 				this._lockAction.visible = true;
 				this._updateHaveLock();
 				this._updateHaveHybridSleep();
-			}));
+			}));*/
 	},
 
 	disable: function () {
