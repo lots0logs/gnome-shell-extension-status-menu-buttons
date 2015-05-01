@@ -278,8 +278,7 @@ const Extension = new Lang.Class({
 
 	_updateHaveLock: function () {
 		this._haveLock = true;
-		this._lockScreenAction.visible = true;
-		//this._updateLock();
+		this._updateLock();
 	},
 
 	_updateLock: function () {
@@ -308,24 +307,26 @@ const Extension = new Lang.Class({
 		this._loginManager = new SystemdProxy();
 		this.systemMenu = Main.panel.statusArea['aggregateMenu']._system;
 
-		this.systemMenu.prototype['_updateLockScreen'] = this._updateHaveLock();
+		//this.systemMenu.prototype['_updateLockScreen'] = this._updateHaveLock();
 
-		/*this._hibernateAction = this.systemMenu._createActionButton('document-save-symbolic', _("Hibernate"));
+		this._hibernateAction = this.systemMenu._createActionButton('document-save-symbolic', _("Hibernate"));
 		this._hibernateActionId = this._hibernateAction.connect('clicked', Lang.bind(this, this._onHibernateClicked));
 
 		this._hybridSleepAction = this.systemMenu._createActionButton('document-save-as-symbolic', _("HybridSleep"));
 		this._hybridSleepActionId = this._hybridSleepAction.connect('clicked', Lang.bind(this, this._onHybridSleepClicked));
 
-		this._disabledLockButton = this.systemMenu._actionsItem.actor.get_child_at_index(1);
-		this._disabledHibernateButton = this.systemMenu._actionsItem.actor.get_child_at_index(2);
+		this._disabledLockButton = this.systemMenu._actionsItem.actor.get_child_at_index(2);
+		this._disabledHibernateButton = this.systemMenu._actionsItem.actor.get_child_at_index(3);
 
 		this._lockAction = this.systemMenu._createActionButton('system-lock-screen-symbolic', _("Lock"));
 		this._lockActionId = this._lockAction.connect('clicked', Lang.bind(this, this._onLockClicked));
-		this.systemMenu._actionsItem.actor.replace_child(this._disabledLockButton, this._lockAction);
-
+		
+this.systemMenu._actionsItem.actor.replace_child(this._disabledLockButton, this._lockAction);
+//this._lockActionX = this._lockAction.get_x();
+//this._lockAction.set_x(this._lockActionX - 10);
 		this._altHibernateSwitcher = new StatusSystem.AltSwitcher(this._hibernateAction, this._hybridSleepAction);
 		this.systemMenu._actionsItem.actor.replace_child(this._disabledHibernateButton, this._altHibernateSwitcher.actor);
-
+                
 		this._menuOpenStateChangedId = this.systemMenu.menu.connect('open-state-changed', Lang.bind(this,
 			function (menu, open) {
 				if (!open)
@@ -334,8 +335,10 @@ const Extension = new Lang.Class({
 				this._updateHaveHibernate();
 				this._lockAction.visible = true;
 				this._updateHaveLock();
+                                this._lockActionX = this._lockAction.get_x();
+this._lockAction.set_x(this._lockActionX - 15);
 				this._updateHaveHybridSleep();
-			}));*/
+			}));
 	},
 
 	disable: function () {
