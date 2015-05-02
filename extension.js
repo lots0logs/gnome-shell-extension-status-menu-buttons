@@ -69,30 +69,30 @@ const SystemdProxyIface = '<node> \
 </node>';
 
 /*const LightLockerProxyIface = '<node> \
-<interface name="org.gnome.ScreenSaver"> \
-<method name="Lock"> \
-    <arg type="b" direction="in"/> \
-</method> \
-</interface> \
-</node>';*/
+ <interface name="org.gnome.ScreenSaver"> \
+ <method name="Lock"> \
+ <arg type="b" direction="in"/> \
+ </method> \
+ </interface> \
+ </node>';*/
 
 const SystemdLoginManagerProxy = Gio.DBusProxy.makeProxyWrapper(SystemdProxyIface);
 //const LightLockerDbusProxy = Gio.DBusProxy.makeProxyWrapper(LightLockerProxyIface);
 
 /*const LightLockerProxy = new Lang.Class({
-	Name: 'LightLockerProxy',
+ Name: 'LightLockerProxy',
 
-	_init: function () {
-		this._proxy = new LightLockerDbusProxy(Gio.DBus.system,
-			'org.gnome.ScreenSaver',
-			'/org/gnome/ScreenSaver');
-	},
+ _init: function () {
+ this._proxy = new LightLockerDbusProxy(Gio.DBus.system,
+ 'org.gnome.ScreenSaver',
+ '/org/gnome/ScreenSaver');
+ },
 
-	lock: function () {
-		this._proxy.LockRemote(true);
-	}
-});
-Signals.addSignalMethods(LightLockerProxy.prototype);*/
+ lock: function () {
+ this._proxy.LockRemote(true);
+ }
+ });
+ Signals.addSignalMethods(LightLockerProxy.prototype);*/
 
 const SystemdProxy = new Lang.Class({
 	Name: 'SystemdProxy',
@@ -237,22 +237,22 @@ const Extension = new Lang.Class({
 	},
 
 	/*_lightLockerLock: function () {
-		if (this._lightLocker._proxy) {
-			this._lightLocker._proxy.call("Lock",
-				GLib.Variant.new('(b)', [true]),
-				Gio.DBusCallFlags.NONE,
-				-1, null, null);
-		} else {
-			global.log('Unable to communicate with Light Locker. Is it running?')
-			this._dialog = new ConfirmDialog.ConfirmDialog(ConfirmDialog.LightLockerMissingDialogContent);
-			this._dialog.connect('DisableExtension', function () {
-				let enabledExtensions = global.settings.get_strv(ExtensionSystem.ENABLED_EXTENSIONS_KEY);
-				enabledExtensions.splice(enabledExtensions.indexOf(Me.uuid), 1);
-				global.settings.set_strv(ExtensionSystem.ENABLED_EXTENSIONS_KEY, enabledExtensions);
-			});
-			this._dialog.open();
-		}
-	},*/
+	 if (this._lightLocker._proxy) {
+	 this._lightLocker._proxy.call("Lock",
+	 GLib.Variant.new('(b)', [true]),
+	 Gio.DBusCallFlags.NONE,
+	 -1, null, null);
+	 } else {
+	 global.log('Unable to communicate with Light Locker. Is it running?')
+	 this._dialog = new ConfirmDialog.ConfirmDialog(ConfirmDialog.LightLockerMissingDialogContent);
+	 this._dialog.connect('DisableExtension', function () {
+	 let enabledExtensions = global.settings.get_strv(ExtensionSystem.ENABLED_EXTENSIONS_KEY);
+	 enabledExtensions.splice(enabledExtensions.indexOf(Me.uuid), 1);
+	 global.settings.set_strv(ExtensionSystem.ENABLED_EXTENSIONS_KEY, enabledExtensions);
+	 });
+	 this._dialog.open();
+	 }
+	 },*/
 
 	_updateHaveHibernate: function () {
 		this._loginManagerCanHibernate(Lang.bind(this, function (result) {
@@ -320,13 +320,12 @@ const Extension = new Lang.Class({
 
 		this._lockAction = this.systemMenu._createActionButton('system-lock-screen-symbolic', _("Lock"));
 		this._lockActionId = this._lockAction.connect('clicked', Lang.bind(this, this._onLockClicked));
-		
-this.systemMenu._actionsItem.actor.replace_child(this._disabledLockButton, this._lockAction);
-//this._lockActionX = this._lockAction.get_x();
-//this._lockAction.set_x(this._lockActionX - 10);
+
+		this.systemMenu._actionsItem.actor.replace_child(this._disabledLockButton, this._lockAction);
+
 		this._altHibernateSwitcher = new StatusSystem.AltSwitcher(this._hibernateAction, this._hybridSleepAction);
 		this.systemMenu._actionsItem.actor.replace_child(this._disabledHibernateButton, this._altHibernateSwitcher.actor);
-                
+
 		this._menuOpenStateChangedId = this.systemMenu.menu.connect('open-state-changed', Lang.bind(this,
 			function (menu, open) {
 				if (!open)
@@ -335,8 +334,6 @@ this.systemMenu._actionsItem.actor.replace_child(this._disabledLockButton, this.
 				this._updateHaveHibernate();
 				this._lockAction.visible = true;
 				this._updateHaveLock();
-                                this._lockActionX = this._lockAction.get_x();
-this._lockAction.set_x(this._lockActionX - 15);
 				this._updateHaveHybridSleep();
 			}));
 	},
