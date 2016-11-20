@@ -98,9 +98,6 @@ const StatusMenuButtons = new Lang.Class( {
 
 				if ( disconnect ) {
 					obj.disconnect( connection.id );
-					obj.connect( signalName, newCallback );
-					log('breaking for ' + signalName );
-					break;
 				}
 			}
 
@@ -112,19 +109,21 @@ const StatusMenuButtons = new Lang.Class( {
 				handlerID;
 
 			if ( all ) {
-				handlerID = GObject.signal_handler_find( obj, mask, signalName, null, null, null, null );
+				let ID = GObject.signal_lookup( signalName, obj );
+				handlerID = GObject.signal_handler_find( obj, mask, ID, null, null, null, null );
 			} else {
 				handlerID = GObject.signal_handler_find( obj, mask, null, null, oldCallback, null, null );
 			}
 
 			if ( 0 === handlerID ) {
-				log('Signal handler not found for ' + signalName + ' on ' + obj.toString() );
+				// log('Signal handler not found for ' + signalName + ' on ' + obj.toString() );
 				return;
 			}
 
 			GObject.signal_handler_disconnect( obj, handlerID );
-			obj.connect( signalName, newCallback );
 		}
+
+		return obj.connect( signalName, newCallback );
 	},
 
 	_updateLockScreen: function() {
@@ -182,6 +181,7 @@ const StatusMenuButtons = new Lang.Class( {
 	},
 
 	onLockScreenClicked: function() {
+		log('fired!!!');
 		system.menu.itemActivated( BoxPointer.PopupAnimation.NONE );
 		Util.spawn( ['/usr/bin/light-locker-command', '-l'] );
 	}
