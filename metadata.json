@@ -2,11 +2,10 @@
  "uuid": "status-menu-buttons@dev.antergos.com",
  "name": "Status Menu Buttons",
  "url": "https://github.com/antergos/gnome-shell-extension-status-menu-buttons",
- "description": "Adds a hibernate, suspend, & lock button to the status menu when using LightDM.",
- "version": "0.3",
- "shell-version": ["3.14",
-                   "3.16",
-                   "3.18",
+ "description": "Adds a hibernate, suspend, & lock button to the status menu when using LightDM & Light Locker.",
+ "version": "0.4",
+ "shell-version": ["3.18",
                    "3.20",
-                   "3.21"]
+                   "3.22",
+                   "3.23"]
 }
